@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>PKI WebSDK Examples - Signed Data</title>	
+		<link rel="stylesheet" href="../dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../dist/css/style.css">
+		<link rel="stylesheet" href="../dist/css/examples-certificate.css">
+        <script src="../pkiwebsdk_bundle.js"></script>
+        <style>
+		* {
+		  margin: 0;
+		}
+		html, body {
+		  height: 100%;
+		}
+		.page-wrap {
+		  min-height: 90%;
+		  /* equal to footer height */
+		  margin-bottom: 0px; 
+		}
+		.page-wrap:after {
+		  content: "";
+		  display: block;
+		}
+        </style>
+    </head>
+    
+    <body>
+		<nav class="navbar navbar-blue navbar-fixed-top">
+		  <div class="container">
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <span><img src="../dist/img/logo.png" class="pull-left img-responsive"></span>
+			  <a class="navbar-brand" href="../index.html"> PKI WebSDK</a>
+			</div>
+			<div id="navbar" class="collapse navbar-collapse">
+			  <ul class="nav navbar-nav pull-right">
+				<li><a href="../certificate/index.html">Certificate</a></li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Key <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="../key/generate.html" target="_blank">Generate</a></li>
+							<li><a href="../key/sign.html" target="_blank">Sign</a></li>
+							<li><a href="../key/verify.html" target="_blank">Verify</a></li>
+							<li><a href="../key/encrypt-decrypt.html" target="_blank">Encrypt Decrypt</a></li>							
+						</ul>	
+				</li>	
+				<li><a href="../pdf/index.html">PDF</a></li>
+				<li class="active"><a href="index.html">Signed Data</a></li>
+				<li><a href="../encrypted-data/encrypt-decrypt.html">Encrypted Data</a></li>
+				<li><a href="../ui/index.html">UI</a></li>
+			  </ul>
+			</div><!--/.nav-collapse -->
+		  </div>
+		</nav>
+
+		<div class="container page-wrap" style="margin-top: 1%;">
+			<div class="tab-container">
+				<ul class="nav nav-tabs">
+					<li class="active"><a class="tab" href="#signing" data-toggle="tab">Signing</a></li>
+					<li><a class="tab" href="#fromder" data-toggle="tab">From DER</a></li>
+					<li><a class="tab" href="#signfile" data-toggle="tab">Sign object data</a></li>
+					<li><a class="tab" href="#verifyfile" data-toggle="tab">Verify detached PKCS#7</a></li>
+					<li><a class="tab" href="#signform" data-toggle="tab">Sign form input</a></li>
+				</ul>
+				<div id="myTabContent" class="tab-content">
+					<div class="tab-pane fade active in" id="signing">
+						<div class="well well-lg col-sm-12">
+							<div class="col-sm-6">
+								<p>File to be signed :</p> 
+								<input type="file" id="file-to-sign" type="file" class="filestyle" data-buttonBefore="true" data-icon="false" data-buttonName="btn-primary"></input>
+								<br>
+								<p>Certificate in PEM :</p> 
+								<input type="file" id="to-sign-certificate" type="file" class="filestyle" data-buttonBefore="true" data-icon="false" data-buttonName="btn-primary"></input>
+								<br>
+								<p>Private Key in PEM :</p>
+								<input type="file" id="to-sign-private-key" type="file" class="filestyle" data-buttonBefore="true" data-icon="false" data-buttonName="btn-primary"></input>
+								<br><br>
+								<button class="btn btn-primary" id="to-sign-trigger">Sign</button>
+							</div>
+						</div>
+					</div>
+					
+					<div class="tab-pane fade" id="fromder">
+						<div class="well well-lg col-sm-12">
+							<div class="col-sm-6">
+								<p>Signed data in DER format :</p>
+									<input type="file" id="der" type="file" class="filestyle" data-buttonBefore="true" data-icon="false" data-buttonName="btn-primary"></input>
+							</div>
+						</div>
+					</div>
+					
+					<div class="tab-pane fade" id="signfile">`
+	          <p>Fill the password</p>
+	          <input type="password" id="get-password-to-sign-object" placeholder="password"></input>
+	          <br><br>
+	          <p>Choose your .p12 file</p>
+	          	<input id="get-p12-to-sign-object" type="file" class="pkiwebsdkupload" />
+              <br>
+	          	<div>Write your object in JSON format</div>
+              <textarea rows="10" cols="50" id="get-object-to-sign"></textarea>
+	          <br>
+	          <button class="pkiwebsdk-button" id="to-sign-object-trigger">Sign</button>
+					</div>
+					
+					<div class="tab-pane fade" id="verifyfile">`
+	          <p>Choose your certificate file (PEM)</p>
+	          <input id="get-cert-to-verify-object" type="file" class="pkiwebsdkupload" />
+            <br>
+	          <p>Choose your detached PKCS#7 file</p>
+	          <input id="get-p7-to-verify-object" type="file" class="pkiwebsdkupload" />
+            <br>
+	          <p>Write your object data (in JSON) that which to be verified</p>
+            <textarea rows="10" cols="50" id="get-object-to-be-verified"></textarea>
+	          <br>
+	          <button class="pkiwebsdk-button" id="to-verify-object-trigger">Verify</button>
+					</div>
+					<div class="tab-pane fade" id="signform">`
+	          <p>Fill the password</p>
+	          <input type="password" id="get-password-to-sign-form" placeholder="password"></input>
+	          <br><br>
+	          <p>Choose your .p12 file</p>
+	          	<input id="get-p12-to-sign-form" type="file" class="pkiwebsdkupload" />
+              <br>
+              <!--INPUT-->
+              <input id="form-to-sign-sender" placeholder="Penerima"></input><br>
+              <input id="form-to-sign-recipient" placeholder="Pengirim"></input><br>
+              <input id="form-to-sign-value" placeholder="Nominal"></input><br>
+              <input id="form-to-sign-info" placeholder="Info tambahan"></input><br>
+	          <br>
+	          <button class="pkiwebsdk-button" id="to-sign-form-trigger">Submit and Sign</button>
+					</div>
+				</div>
+			</div>
+		</div>    
+
+	<footer class="site-footer">
+		<p>&copy; 2015 <a href="http://kominfo.go.id/" class="footer-text">Direktorat Keamanan Informasi - Kementerian Komunikasi dan Informatika Republik Indonesia</a></p>
+	</footer>
+            
+    <script>
+      var derData;
+      var fileToBeSigned;
+      var certificateToSign;
+      var privateKeyToSign;
+      
+      document.getElementById('der').addEventListener('change', function(evt){
+        files = evt.target.files; // FileList object  
+        // files is a FileList of File objects. List some properties.
+        // Read file as ArrayBuffer
+        var reader = new window.FileReader()
+        reader.readAsBinaryString(files[files.length-1]);
+        reader.onload = function(e) {
+          derData = reader.result;
+          var signedData = window.PKIWebSDK.SignedData.parseDER(derData);
+          var data = signedData.getData();
+          console.log(data);
+          data.certificates[0].getSubject()
+            .then(function(subject){
+              alert("Certificate's subject \n" + JSON.stringify(subject));
+            })
+         }
+      });
+      document.getElementById('file-to-sign').addEventListener('change', function(evt){
+        files = evt.target.files; // FileList object  
+        // files is a FileList of File objects. List some properties.
+        // Read file as ArrayBuffer
+        var reader = new window.FileReader()
+        reader.readAsBinaryString(files[files.length-1]);
+        reader.onload = function(e) {
+          fileToBeSigned = reader.result;
+         }
+      });
+      document.getElementById('to-sign-certificate').addEventListener('change', function(evt){
+        var files = evt.target.files; // FileList object  
+        // files is a FileList of File objects. List some properties.
+        // Read file as ArrayBuffer
+        var reader = new window.FileReader()
+        reader.readAsText(files[files.length-1]);
+        reader.onload = function(e) {
+          var cert = new window.PKIWebSDK.Certificate();
+          cert.parsePEM(reader.result)
+            .then(function(cert){
+              certificateToSign = cert;
+            })
+         }
+      });
+      document.getElementById('to-sign-private-key').addEventListener('change', function(evt){
+        var files = evt.target.files; // FileList object  
+        // files is a FileList of File objects. List some properties.
+        // Read file as ArrayBuffer
+        var reader = new window.FileReader()
+        reader.readAsText(files[files.length-1]);
+        reader.onload = function(e) {
+          window.PKIWebSDK.Key.parsePEM(reader.result, "SHA-256")
+            .then(function(key){
+              privateKeyToSign = key;
+            })
+         }
+      });
+
+      document.getElementById("to-sign-trigger").addEventListener("click", function(evt){
+        window.PKIWebSDK.SignedData.sign(certificateToSign, privateKeyToSign, fileToBeSigned)
+          .then(function(result){
+            window.PKIWebSDK.Utils.toFile(result , "signed-data.der", "application/pcks7");
+          })
+      })
+      
+      var p12ToSignObject, certToVerifyObject, derToVerifyObject;
+
+      // Sign
+      document.getElementById("get-p12-to-sign-object").addEventListener("change", function(evt){
+        var files = evt.target.files;
+        var reader = new window.FileReader();
+        reader.readAsArrayBuffer(files[files.length-1]);
+        reader.onload = function(e) {
+          p12ToSignObject = reader.result;
+        }
+      })
+      document.getElementById("to-sign-object-trigger").addEventListener("click", function(evt){
+        // Parse P12
+        var cert = new window.PKIWebSDK.Certificate();
+        cert.parseP12(p12ToSignObject, document.getElementById("get-password-to-sign-object").value)
+          .then(function(result){
+            console.log(result);
+            var json = document.getElementById("get-object-to-sign").value;
+            var obj = JSON.parse(json);
+            var stringified = JSON.stringify(obj);
+            console.log(stringified);
+            var data = window.PKIWebSDK.Utils.str2Ab(stringified);
+            window.PKIWebSDK.Key.parsePEM(result.privateKey, "SHA-256")
+              .then(function(privateKey){
+                console.log(privateKey);
+                window.PKIWebSDK.SignedData.sign(result.certificate, privateKey, data)
+                .then(function(result){
+                  console.log(result);
+                  window.PKIWebSDK.Utils.toFile(result, "signed-data.der", "application/pkcs7");
+                })
+                .catch(function(err){
+                  console.log(err)
+                  alert(err);
+                })
+              })
+              .catch(function(err){
+                console.log(err);
+                alert(err);
+              })
+          })
+          .catch(function(err){
+            console.log(err);
+            alert(err);
+          })
+      })
+      
+      // Verify
+      document.getElementById("get-cert-to-verify-object").addEventListener("change", function(evt){
+        var files = evt.target.files;
+        var reader = new window.FileReader();
+        reader.readAsText(files[files.length-1]);
+        reader.onload = function(e) {
+          certToVerifyObject = reader.result;
+        }
+      })
+      document.getElementById("get-p7-to-verify-object").addEventListener("change", function(evt){
+        var files = evt.target.files;
+        var reader = new window.FileReader();
+        reader.readAsArrayBuffer(files[files.length-1]);
+        reader.onload = function(e) {
+          derToVerifyObject = window.PKIWebSDK.Utils.ab2Str(reader.result);
+        }
+      })
+      document.getElementById("to-verify-object-trigger").addEventListener("click", function(evt){
+        var cert = new window.PKIWebSDK.Certificate();
+        cert.parsePEM(certToVerifyObject)
+        .then(function(cert){
+            var json = document.getElementById("get-object-to-be-verified").value;
+            var obj = JSON.parse(json);
+            var stringified = JSON.stringify(obj);
+            var data = window.PKIWebSDK.Utils.str2Ab(stringified);
+            window.PKIWebSDK.SignedData.verify(cert, derToVerifyObject, data)
+              .then(function(result){
+                alert(result ? "Valid" : "Not valid");
+              })
+          })
+          .catch(function(err){
+            console.log(err);        
+            alert(err);
+          })
+      })
+      
+      // Sign Form Input
+      document.getElementById("get-p12-to-sign-form").addEventListener("change", function(evt){
+        var files = evt.target.files;
+        var reader = new window.FileReader();
+        reader.readAsArrayBuffer(files[files.length-1]);
+        reader.onload = function(e) {
+          p12ToSignObject = reader.result;
+        }
+      })
+      var formInputStringified;
+      var signFormInput = function(){
+        // Parse P12
+        var cert = new window.PKIWebSDK.Certificate();
+        cert.parseP12(p12ToSignObject, document.getElementById("get-password-to-sign-form").value)
+          .then(function(result){
+            console.log(result);
+            var json = {
+              sender : document.getElementById("form-to-sign-sender").value,
+              recipient : document.getElementById("form-to-sign-recipient").value,
+              value : document.getElementById("form-to-sign-value").value,
+              info : document.getElementById("form-to-sign-info").value,
+            }
+            formInputStringified = JSON.stringify(json);
+            console.log(formInputStringified);
+            var data = window.PKIWebSDK.Utils.str2Ab(formInputStringified);
+            window.PKIWebSDK.Key.parsePEM(result.privateKey, "SHA-256")
+              .then(function(privateKey){
+                console.log(privateKey);
+                window.PKIWebSDK.SignedData.sign(result.certificate, privateKey, data)
+                .then(function(result){
+                  console.log(result);
+                  window.PKIWebSDK.Utils.toFile(result, "signed-data.der", "application/pkcs7");
+                })
+                .catch(function(err){
+                  console.log(err)
+                  alert(err);
+                })
+              })
+              .catch(function(err){
+                console.log(err);
+                alert(err);
+              })
+          })
+          .catch(function(err){
+            console.log(err);
+            alert(err);
+          })
+      }
+      document.getElementById("to-sign-form-trigger").addEventListener("click", function(evt){
+        var json = {
+          sender : document.getElementById("form-to-sign-sender").value,
+          recipient : document.getElementById("form-to-sign-recipient").value,
+          value : document.getElementById("form-to-sign-value").value,
+          info : document.getElementById("form-to-sign-info").value,
+        }
+        formInputStringified = JSON.stringify(json);
+        var msg = "The data bellow will be signed before submitted"
+        msg += "\n\n" + formInputStringified + "\n\n";
+        msg += "Please click OK to sign.";
+        var c = confirm(msg);
+        if (c) {
+          signFormInput();
+        }
+      })
+	
+    </script>
+
+	  <script src="../dist/js/jquery-2.1.4.min.js"></script>
+    <script>
+      if (window.require) {
+        window.$ = window.jQuery = require('../dist/js/jquery-2.1.4.min.js');
+      }
+    </script>
+	  <script src="../dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../dist/js/bootstrap-filestyle.min.js"></script>
+
+  </body>
+</html>
